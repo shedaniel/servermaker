@@ -57,7 +57,7 @@ public class ServerManager {
 		return names;
 	}
 
-	public void loadServers() {
+	public void loadServers() throws NullPointerException {
 		servers.clear();
 		File[] filesList = getServerFolder().listFiles();
         for(File f : filesList){
@@ -78,8 +78,8 @@ public class ServerManager {
 		try {
 			getServerConfig();
 			Map<String, String> map = SpigotServer.getServerManager().getServerConfig();
-			SpigotServer.frame.textField_1.setText(map.get("minRam"));
-			SpigotServer.frame.textField_2.setText(map.get("maxRam"));
+			SpigotServer.frame.minRam.setText(map.get("minRam"));
+			SpigotServer.frame.maxRam.setText(map.get("maxRam"));
 		} catch (IOException e) {}
 	}
 	
@@ -147,7 +147,11 @@ public class ServerManager {
 					writerEULA.println("eula = true");
 				}else writerEULA.println("eula = false");
 				writerEULA.close();
-				loadServers();
+				try {
+					loadServers();
+				}catch (NullPointerException e) {
+					
+				}
 				JOptionPane.showMessageDialog(null, "Setup is done!", "Congrets!", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
@@ -179,95 +183,100 @@ public class ServerManager {
 	
 	public void refreshServerDetail()
 	{
-		if (seleted != null) {
-			SpigotServer.frame.lblServerName.setText(seleted.getFolder().getName());
-			SpigotServer.frame.lblServerLocation.setText("Server Location: " + seleted.getFolder().getAbsolutePath());
-			if (new File(seleted.getFolder().getAbsolutePath() + "\\server.properties").exists()) {
-				SpigotServer.frame.lblRunFirst.setVisible(false);
-			}else {
-				SpigotServer.frame.lblRunFirst.setVisible(true);
-			}
-			if (SpigotServer.frame.started == "true") {
-				SpigotServer.frame.btnStart.setText("Stop");
-				SpigotServer.frame.btnStart.setEnabled(true);
-				SpigotServer.frame.textField.setEnabled(true);
+		try {
+			SpigotServer.frame.listServer.setSize(200, 30 * SpigotServer.getServerManager().getServerNames().size());
+			if (seleted != null) {
+				SpigotServer.frame.lblServerName.setText(seleted.getFolder().getName());
+				SpigotServer.frame.lblServerLocation.setText("Server Location: " + seleted.getFolder().getAbsolutePath());
 				if (new File(seleted.getFolder().getAbsolutePath() + "\\server.properties").exists()) {
-					SpigotServer.frame.btnRefresh.setEnabled(true);
+					SpigotServer.frame.lblRunFirst.setVisible(false);
 				}else {
-					SpigotServer.frame.btnRefresh.setEnabled(false);
+					SpigotServer.frame.lblRunFirst.setVisible(true);
 				}
-				SpigotServer.frame.btnSave.setEnabled(false);
-				SpigotServer.frame.btnResetWorld.setEnabled(false);
-				SpigotServer.frame.btnResetSettings.setEnabled(false);
-				SpigotServer.frame.btnRefreshRam.setEnabled(false);
-				SpigotServer.frame.btnSetRam.setEnabled(false);
-			}else {
-				SpigotServer.frame.btnRefreshRam.setEnabled(true);
-				SpigotServer.frame.btnSetRam.setEnabled(true);
-				if (SpigotServer.frame.started == "false") {
-					SpigotServer.frame.btnStart.setText("Start");
+				if (SpigotServer.frame.started == "true") {
+					SpigotServer.frame.btnStart.setText("Stop");
 					SpigotServer.frame.btnStart.setEnabled(true);
-					SpigotServer.frame.textField.setEnabled(false);
+					SpigotServer.frame.consoleCommand.setEnabled(true);
 					if (new File(seleted.getFolder().getAbsolutePath() + "\\server.properties").exists()) {
 						SpigotServer.frame.btnRefresh.setEnabled(true);
-						SpigotServer.frame.btnSave.setEnabled(true);
 					}else {
 						SpigotServer.frame.btnRefresh.setEnabled(false);
-						SpigotServer.frame.btnSave.setEnabled(false);
 					}
-					SpigotServer.frame.btnResetWorld.setEnabled(true);
-					SpigotServer.frame.btnResetSettings.setEnabled(true);
-				}else {
-					SpigotServer.frame.btnStart.setText("Stopping...");
-					SpigotServer.frame.btnStart.setEnabled(false);
-					SpigotServer.frame.textField.setEnabled(false);
 					SpigotServer.frame.btnSave.setEnabled(false);
-					SpigotServer.frame.btnRefresh.setEnabled(false);
 					SpigotServer.frame.btnResetWorld.setEnabled(false);
 					SpigotServer.frame.btnResetSettings.setEnabled(false);
-				}
-			}
-			File pluginFolder = new File(seleted.getFolder().getAbsolutePath() + "\\plugins");
-			List<String> plugins = new ArrayList<>();
-			if (pluginFolder.exists()) {
-				File[] list = pluginFolder.listFiles();
-				for (File file : list) {
-					if (!file.isDirectory()) {
-						plugins.add(file.getName());
+					SpigotServer.frame.btnRefreshRam.setEnabled(false);
+					SpigotServer.frame.btnSetRam.setEnabled(false);
+				}else {
+					SpigotServer.frame.btnRefreshRam.setEnabled(true);
+					SpigotServer.frame.btnSetRam.setEnabled(true);
+					if (SpigotServer.frame.started == "false") {
+						SpigotServer.frame.btnStart.setText("Start");
+						SpigotServer.frame.btnStart.setEnabled(true);
+						SpigotServer.frame.consoleCommand.setEnabled(false);
+						if (new File(seleted.getFolder().getAbsolutePath() + "\\server.properties").exists()) {
+							SpigotServer.frame.btnRefresh.setEnabled(true);
+							SpigotServer.frame.btnSave.setEnabled(true);
+						}else {
+							SpigotServer.frame.btnRefresh.setEnabled(false);
+							SpigotServer.frame.btnSave.setEnabled(false);
+						}
+						SpigotServer.frame.btnResetWorld.setEnabled(true);
+						SpigotServer.frame.btnResetSettings.setEnabled(true);
+					}else {
+						SpigotServer.frame.btnStart.setText("Stopping...");
+						SpigotServer.frame.btnStart.setEnabled(false);
+						SpigotServer.frame.consoleCommand.setEnabled(false);
+						SpigotServer.frame.btnSave.setEnabled(false);
+						SpigotServer.frame.btnRefresh.setEnabled(false);
+						SpigotServer.frame.btnResetWorld.setEnabled(false);
+						SpigotServer.frame.btnResetSettings.setEnabled(false);
 					}
 				}
+				File pluginFolder = new File(seleted.getFolder().getAbsolutePath() + "\\plugins");
+				List<String> plugins = new ArrayList<>();
+				if (pluginFolder.exists()) {
+					File[] list = pluginFolder.listFiles();
+					for (File file : list) {
+						if (!file.isDirectory()) {
+							plugins.add(file.getName());
+						}
+					}
+				}
+				List<String> list = new ArrayList<>();
+				ListModel<String> model = SpigotServer.frame.pluginsList.getModel();
+				for(int i=0; i < model.getSize(); i++){
+				     list.add(model.getElementAt(i));
+				}
+				System.out.println(plugins.size() + " + " + list.size());
+				if (list.size() != plugins.size()) {
+					SpigotServer.frame.pluginsList.setListData(plugins.toArray(new String[plugins.size()]));
+				}
+				SpigotServer.frame.btnDeleteSelected.setEnabled(!(list.isEmpty() || SpigotServer.frame.started != "false"));
+				SpigotServer.frame.btnDeleteAll.setEnabled(!(list.isEmpty() || SpigotServer.frame.started != "false"));
+				SpigotServer.frame.fileInput.setEnabled(!(SpigotServer.frame.started != "false"));
+				SpigotServer.frame.lblDragFilesHere.setText("Drag Files Here");
+			}else {
+				SpigotServer.frame.lblDragFilesHere.setText("Select a Server First");
+				SpigotServer.frame.lblRunFirst.setVisible(false);
+				SpigotServer.frame.btnRefreshRam.setEnabled(false);
+				SpigotServer.frame.btnSetRam.setEnabled(false);
+				SpigotServer.frame.btnStart.setEnabled(false);
+				SpigotServer.frame.consoleCommand.setEnabled(false);
+				SpigotServer.frame.btnSave.setEnabled(false);
+				SpigotServer.frame.btnRefresh.setEnabled(false);
+				SpigotServer.frame.btnResetWorld.setEnabled(false);
+				SpigotServer.frame.btnResetSettings.setEnabled(false);
+				SpigotServer.frame.btnDeleteSelected.setEnabled(false);
+				SpigotServer.frame.btnDeleteAll.setEnabled(false);
+				SpigotServer.frame.fileInput.setEnabled(false);
+				List<String> Null = new ArrayList<>();
+				SpigotServer.frame.pluginsList.setListData(Null.toArray(new String[Null.size()]));
 			}
-			List<String> list = new ArrayList<>();
-			ListModel<String> model = SpigotServer.frame.pluginsList.getModel();
-			for(int i=0; i < model.getSize(); i++){
-			     list.add(model.getElementAt(i));
-			}
-			System.out.println(plugins.size() + " + " + list.size());
-			if (list.size() != plugins.size()) {
-				SpigotServer.frame.pluginsList.setListData(plugins.toArray(new String[plugins.size()]));
-			}
-			SpigotServer.frame.btnDeleteSelected.setEnabled(!(list.isEmpty() || SpigotServer.frame.started != "false"));
-			SpigotServer.frame.btnDeleteAll.setEnabled(!(list.isEmpty() || SpigotServer.frame.started != "false"));
-			SpigotServer.frame.fileInput.setEnabled(!(SpigotServer.frame.started != "false"));
-			SpigotServer.frame.lblDragFilesHere.setText("Drag Files Here");
-		}else {
-			SpigotServer.frame.lblDragFilesHere.setText("Select a Server First");
-			SpigotServer.frame.lblRunFirst.setVisible(false);
-			SpigotServer.frame.btnRefreshRam.setEnabled(false);
-			SpigotServer.frame.btnSetRam.setEnabled(false);
-			SpigotServer.frame.btnStart.setEnabled(false);
-			SpigotServer.frame.textField.setEnabled(false);
-			SpigotServer.frame.btnSave.setEnabled(false);
-			SpigotServer.frame.btnRefresh.setEnabled(false);
-			SpigotServer.frame.btnResetWorld.setEnabled(false);
-			SpigotServer.frame.btnResetSettings.setEnabled(false);
-			SpigotServer.frame.btnDeleteSelected.setEnabled(false);
-			SpigotServer.frame.btnDeleteAll.setEnabled(false);
-			SpigotServer.frame.fileInput.setEnabled(false);
-			List<String> Null = new ArrayList<>();
-			SpigotServer.frame.pluginsList.setListData(Null.toArray(new String[Null.size()]));
+			SpigotServer.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		}catch (NullPointerException e) {
+			
 		}
-		SpigotServer.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
 	public void saveConfigData(String s, String value) throws IOException {

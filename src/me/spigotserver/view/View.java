@@ -62,24 +62,24 @@ public class View extends JFrame {
 	public JButton btnStart;
 	public String started = "false";
 	Runnable serverRun;
-	public JTextField textField;
+	public JTextField consoleCommand;
 	public JTabbedPane tabbedPane;
 	public JScrollPane propertyPane;
 	private JPanel settings;
-	private JLabel label_14;
-	private JLabel label_15;
-	private JLabel label_16;
-	private JLabel label_17;
-	private JLabel label_18;
-	private JLabel label_19;
-	private JLabel label_20;
-	private JLabel label_21;
-	private JLabel label_22;
-	private JLabel label_23;
-	private JLabel label_24;
-	private JLabel label_25;
-	private JLabel label_26;
-	private JLabel label_27;
+	private JLabel lblMaxPlayers;
+	private JLabel lblGameMode;
+	private JLabel lblForceGamemode;
+	private JLabel lblDifficulty;
+	private JLabel lblHardcoreMode;
+	private JLabel lblPVP;
+	private JLabel lblWhiteList;
+	private JLabel lblCommandBlock;
+	private JLabel lblSpawnProtection;
+	private JLabel lblGeneral;
+	private JLabel lblWorld;
+	private JLabel lblWorldSeed;
+	private JLabel lblBuildLimit;
+	private JLabel lblOnlineMode;
 	public JLabel lblRunFirst;
 	private JLabel lblSpawnVillager;
 	private JLabel lblViewDistance;
@@ -103,16 +103,17 @@ public class View extends JFrame {
 	private JTextField serverIP;
 	String[] gamemodes = {"Survival (0)", "Creative (1)", "Adventure (2)", "Spectator (3)"};
 	String[] difficulties = {"Peaceful (0)", "Easy (1)", "Normal (2)", "Hard (3)"};
+	String[] worldType = {"Default (DEFAULT)", "Flat (FLAT)", "Other (?)"};
 	private JCheckBox pvp;
 	public JButton btnRefresh, btnRefreshRam, btnSetRam;
 	public JButton btnSave;
-	private JComboBox<String> gamemode, difficulty;
+	private JComboBox<String> gamemode, difficulty, worldTypes;
 	private JLabel lblMoreSettings;
 	public JButton btnResetWorld;
 	public JButton btnResetSettings;
 	private JLabel lblConsole;
-	public JTextField textField_1;
-	public JTextField textField_2;
+	public JTextField minRam;
+	public JTextField maxRam;
 	private JLabel lblPlugins;
 	private JLabel lblInputPlugins;
 	public JList<String> pluginsList;
@@ -120,13 +121,15 @@ public class View extends JFrame {
 	public JButton btnDeleteAll;
 	public JPanel fileInput;
 	public JLabel lblDragFilesHere;
+	public Thread serverThread;
+	private JLabel lblConsoleCommand;
 
 	/**
 	 * Create the frame.
 	 */
 	public View() {
+		setVisible(false);
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Server Maker");
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
@@ -176,6 +179,7 @@ public class View extends JFrame {
 		listServer = new JList<String>();
 		listServer.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
+				listServer.setSize(200, 30 * SpigotServer.getServerManager().getServerNames().size());
 				SpigotServer.getServerManager().setSeleted(listServer.getSelectedIndex());
 				try {
 					refreshServerData();
@@ -228,8 +232,8 @@ public class View extends JFrame {
 						
 						info("Running in " + batchFile.getAbsolutePath() + "\n");
 						serverRun = new RunServer(batchFile);
-						Thread thread = new Thread(serverRun);
-						thread.start();
+						serverThread = new Thread(serverRun);
+						serverThread.start();
 					}catch (IOException ep) {
 						ep.printStackTrace();
 					}
@@ -254,26 +258,26 @@ public class View extends JFrame {
 		console.setText("Server Console");
 		console.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 14));
 		
-		textField = new JTextField();
-		textField.addActionListener(new ActionListener() {
+		consoleCommand = new JTextField();
+		consoleCommand.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (started == "true") {
-					if (textField.getText() == "stop") {
+					if (consoleCommand.getText() == "stop") {
 						started = "closing";
 						RunServer run = (RunServer) serverRun;
 						run.inputCommand("stop");
-						textField.setText("");
+						consoleCommand.setText("");
 					}else {
 						RunServer run = (RunServer) serverRun;
-						run.inputCommand(textField.getText());
-						textField.setText("");
+						run.inputCommand(consoleCommand.getText());
+						consoleCommand.setText("");
 					}
 				}
 			}
 		});
-		textField.setBounds(10, 502, 559, 20);
-		basicPanel.add(textField);
-		textField.setColumns(10);
+		consoleCommand.setBounds(140, 502, 429, 24);
+		basicPanel.add(consoleCommand);
+		consoleCommand.setColumns(10);
 		
 		lblMoreSettings = new JLabel("Reset");
 		lblMoreSettings.setBounds(10, 92, 559, 32);
@@ -325,28 +329,28 @@ public class View extends JFrame {
 		lblMinimumRam.setBounds(109, 206, 98, 21);
 		basicPanel.add(lblMinimumRam);
 		
-		textField_1 = new JTextField();
-		textField_1.setBounds(217, 207, 86, 20);
-		basicPanel.add(textField_1);
-		textField_1.setColumns(10);
+		minRam = new JTextField();
+		minRam.setBounds(217, 207, 86, 20);
+		basicPanel.add(minRam);
+		minRam.setColumns(10);
 		
 		JLabel lblMaximumRam = new JLabel("Maximum Ram:");
 		lblMaximumRam.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 14));
 		lblMaximumRam.setBounds(313, 206, 98, 21);
 		basicPanel.add(lblMaximumRam);
 		
-		textField_2 = new JTextField();
-		textField_2.setColumns(10);
-		textField_2.setBounds(421, 207, 86, 20);
-		basicPanel.add(textField_2);
+		maxRam = new JTextField();
+		maxRam.setColumns(10);
+		maxRam.setBounds(421, 207, 86, 20);
+		basicPanel.add(maxRam);
 		
 		btnRefreshRam = new JButton("Refresh Ram");
 		btnRefreshRam.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					Map<String, String> map = SpigotServer.getServerManager().getServerConfig();
-					textField_1.setText(map.get("minRam"));
-					textField_2.setText(map.get("maxRam"));
+					minRam.setText(map.get("minRam"));
+					maxRam.setText(map.get("maxRam"));
 				} catch (IOException e) {}
 			}
 		});
@@ -358,14 +362,19 @@ public class View extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					Map<String, String> map = SpigotServer.getServerManager().getServerConfig();
-					map.replace("minRam", textField_1.getText());
-					map.replace("maxRam", textField_2.getText());
+					map.replace("minRam", minRam.getText());
+					map.replace("maxRam", maxRam.getText());
 					SpigotServer.getServerManager().setServerConfig(map);
 				} catch (IOException e) {}
 			}
 		});
 		btnSetRam.setBounds(217, 178, 89, 23);
 		basicPanel.add(btnSetRam);
+		
+		lblConsoleCommand = new JLabel("Console Command:");
+		lblConsoleCommand.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 14));
+		lblConsoleCommand.setBounds(10, 505, 120, 21);
+		basicPanel.add(lblConsoleCommand);
 		
 		advancedPanel = new JPanel();
 		advancedPanel.setBackground(new Color(255, 255, 255));
@@ -390,81 +399,81 @@ public class View extends JFrame {
 		settings.setPreferredSize(new Dimension(589, 600));
 		propertyPane.setViewportView(settings);
 		
-		label_14 = new JLabel("Max Players:");
-		label_14.setToolTipText("The maximum number of players that can play on the server at the same time. Note that if more players are on the server it will use more resources.");
-		label_14.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_14.setBounds(10, 43, 128, 22);
-		settings.add(label_14);
+		lblMaxPlayers = new JLabel("Max Players:");
+		lblMaxPlayers.setToolTipText("The maximum number of players that can play on the server at the same time. Note that if more players are on the server it will use more resources.");
+		lblMaxPlayers.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblMaxPlayers.setBounds(10, 43, 128, 22);
+		settings.add(lblMaxPlayers);
 		
-		label_15 = new JLabel("Gamemode:");
-		label_15.setToolTipText("Defines the mode of gameplay.");
-		label_15.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_15.setBounds(10, 76, 128, 22);
-		settings.add(label_15);
+		lblGameMode = new JLabel("Gamemode:");
+		lblGameMode.setToolTipText("Defines the mode of gameplay.");
+		lblGameMode.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblGameMode.setBounds(10, 76, 128, 22);
+		settings.add(lblGameMode);
 		
-		label_16 = new JLabel("Force Gamemode:");
-		label_16.setToolTipText("Force players to join in the default game mode.");
-		label_16.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_16.setBounds(213, 76, 128, 22);
-		settings.add(label_16);
+		lblForceGamemode = new JLabel("Force Gamemode:");
+		lblForceGamemode.setToolTipText("Force players to join in the default game mode.");
+		lblForceGamemode.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblForceGamemode.setBounds(213, 76, 128, 22);
+		settings.add(lblForceGamemode);
 		
-		label_17 = new JLabel("Difficulty:");
-		label_17.setToolTipText("Defines the difficulty (such as damage dealt by mobs and the way hunger and poison affects players) of the server.");
-		label_17.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_17.setBounds(10, 109, 128, 22);
-		settings.add(label_17);
+		lblDifficulty = new JLabel("Difficulty:");
+		lblDifficulty.setToolTipText("Defines the difficulty (such as damage dealt by mobs and the way hunger and poison affects players) of the server.");
+		lblDifficulty.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblDifficulty.setBounds(10, 109, 128, 22);
+		settings.add(lblDifficulty);
 		
-		label_18 = new JLabel("Hardcore Mode:");
-		label_18.setToolTipText("If set to true, players will be set to spectator mode if they die.");
-		label_18.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_18.setBounds(213, 109, 128, 22);
-		settings.add(label_18);
+		lblHardcoreMode = new JLabel("Hardcore Mode:");
+		lblHardcoreMode.setToolTipText("If set to true, players will be set to spectator mode if they die.");
+		lblHardcoreMode.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblHardcoreMode.setBounds(213, 109, 128, 22);
+		settings.add(lblHardcoreMode);
 		
-		label_19 = new JLabel("PvP:");
-		label_19.setToolTipText("Enable PvP on the server. Players shooting themselves with arrows will only receive damage if PvP is enabled.");
-		label_19.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_19.setBounds(10, 142, 128, 22);
-		settings.add(label_19);
+		lblPVP = new JLabel("PvP:");
+		lblPVP.setToolTipText("Enable PvP on the server. Players shooting themselves with arrows will only receive damage if PvP is enabled.");
+		lblPVP.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblPVP.setBounds(10, 142, 128, 22);
+		settings.add(lblPVP);
 		
-		label_20 = new JLabel("Whitelist:");
-		label_20.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_20.setBounds(10, 175, 96, 22);
-		settings.add(label_20);
+		lblWhiteList = new JLabel("Whitelist:");
+		lblWhiteList.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblWhiteList.setBounds(10, 175, 96, 22);
+		settings.add(lblWhiteList);
 		
-		label_21 = new JLabel("Command Block:");
-		label_21.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_21.setBounds(10, 241, 128, 22);
-		settings.add(label_21);
+		lblCommandBlock = new JLabel("Command Block:");
+		lblCommandBlock.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblCommandBlock.setBounds(10, 439, 128, 22);
+		settings.add(lblCommandBlock);
 		
-		label_22 = new JLabel("Spawn Protection:");
-		label_22.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_22.setBounds(10, 274, 128, 22);
-		settings.add(label_22);
+		lblSpawnProtection = new JLabel("Spawn Protection:");
+		lblSpawnProtection.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblSpawnProtection.setBounds(10, 274, 128, 22);
+		settings.add(lblSpawnProtection);
 		
-		label_23 = new JLabel("General");
-		label_23.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 16));
-		label_23.setBounds(10, 11, 128, 22);
-		settings.add(label_23);
+		lblGeneral = new JLabel("General");
+		lblGeneral.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 16));
+		lblGeneral.setBounds(10, 11, 128, 22);
+		settings.add(lblGeneral);
 		
-		label_24 = new JLabel("World");
-		label_24.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 16));
-		label_24.setBounds(10, 208, 128, 22);
-		settings.add(label_24);
+		lblWorld = new JLabel("World");
+		lblWorld.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 16));
+		lblWorld.setBounds(10, 208, 128, 22);
+		settings.add(lblWorld);
 		
-		label_25 = new JLabel("World Seed:");
-		label_25.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_25.setBounds(213, 241, 128, 22);
-		settings.add(label_25);
+		lblWorldSeed = new JLabel("World Seed:");
+		lblWorldSeed.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblWorldSeed.setBounds(213, 241, 128, 22);
+		settings.add(lblWorldSeed);
 		
-		label_26 = new JLabel("Build Limit:");
-		label_26.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_26.setBounds(213, 274, 128, 22);
-		settings.add(label_26);
+		lblBuildLimit = new JLabel("Build Limit:");
+		lblBuildLimit.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblBuildLimit.setBounds(213, 274, 128, 22);
+		settings.add(lblBuildLimit);
 		
-		label_27 = new JLabel("Online Mode:");
-		label_27.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
-		label_27.setBounds(213, 175, 128, 22);
-		settings.add(label_27);
+		lblOnlineMode = new JLabel("Online Mode:");
+		lblOnlineMode.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblOnlineMode.setBounds(213, 175, 128, 22);
+		settings.add(lblOnlineMode);
 		
 		lblSpawnVillager = new JLabel("Spawn Villager:");
 		lblSpawnVillager.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
@@ -552,7 +561,7 @@ public class View extends JFrame {
 		
 		commandBlock = new JCheckBox("");
 		commandBlock.setBackground(Color.WHITE);
-		commandBlock.setBounds(174, 240, 21, 23);
+		commandBlock.setBounds(174, 438, 21, 23);
 		settings.add(commandBlock);
 		
 		spawnProtection = new JTextField();
@@ -605,6 +614,18 @@ public class View extends JFrame {
 		pvp.setBounds(174, 141, 21, 23);
 		settings.add(pvp);
 		
+		JLabel lblWorldType = new JLabel("World Type:");
+		lblWorldType.setFont(new Font("Segoe UI Semilight", Font.PLAIN, 16));
+		lblWorldType.setBounds(10, 241, 96, 22);
+		settings.add(lblWorldType);
+		
+		worldTypes = new JComboBox<String>();
+		for (String s : worldType) {
+			worldTypes.addItem(s);
+		}
+		worldTypes.setBounds(109, 241, 86, 22);
+		settings.add(worldTypes);
+		
 		btnRefresh = new JButton("Refresh");
 		btnRefresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -641,8 +662,18 @@ public class View extends JFrame {
 					SpigotServer.getServerManager().saveConfigData("view-distance", viewDistance.getText());
 					SpigotServer.getServerManager().saveConfigData("server-port", serverPort.getText());
 					SpigotServer.getServerManager().saveConfigData("server-ip", serverIP.getText());
+					switch(worldTypes.getSelectedIndex()) {
+					case 0:
+						SpigotServer.getServerManager().saveConfigData("level-type", "DEFAULT");
+						break;
+					case 1:
+						SpigotServer.getServerManager().saveConfigData("level-type", "FLAT");
+						break;
+					case 2:
+						break;
+					}
 					refreshServerData();
-					JOptionPane.showMessageDialog(null, "Successfully Saved Config");
+					JOptionPane.showMessageDialog(null, "Successfully Saved Config", "Config Saved!", JOptionPane.PLAIN_MESSAGE);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -678,11 +709,14 @@ public class View extends JFrame {
 			@Override
 			public void filesDropped(File[] files) {
 				File pluginFolder = new File(SpigotServer.getServerManager().getSeletedServer().getFolder().getAbsolutePath() + "\\plugins");
+				if (!pluginFolder.exists()) {
+					pluginFolder.mkdir();
+				}
 				if (pluginFolder.exists()) {
 					File[] list = pluginFolder.listFiles();
 					for (File f : files) {
 						if (FileUtils.contains(f, list)) {
-							int answer = JOptionPane.showConfirmDialog(null, "Plugin " + f.getName() + " already exist!\nDo you want to override it?", "Info", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+							int answer = JOptionPane.showConfirmDialog(SpigotServer.frame, "Plugin " + f.getName() + " already exist!\nDo you want to override it?", "Info", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
 							if (answer == JOptionPane.YES_OPTION) {
 								try {
 									FileUtils.copyFile(f, new File(pluginFolder.getAbsoluteFile() + "\\" + f.getName()));
@@ -823,6 +857,16 @@ public class View extends JFrame {
 		setPropertyText(serverPort, "server-port");
 		gamemode.setSelectedIndex(Integer.parseInt(SpigotServer.getServerManager().getConfigData("gamemode")));
 		difficulty.setSelectedIndex(Integer.parseInt(SpigotServer.getServerManager().getConfigData("difficulty")));
+		switch(SpigotServer.getServerManager().getConfigData("level-type")) {
+		case "DEFAULT":
+			worldTypes.setSelectedIndex(0);
+			break;
+		case "FLAT":
+			worldTypes.setSelectedIndex(1);
+			break;
+		default:
+			worldTypes.setSelectedIndex(2);
+		}
 	}
 
 	private void setCheckboxSelected(JCheckBox checkbox, String string) throws IOException {

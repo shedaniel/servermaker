@@ -1,5 +1,7 @@
 package me.spigotserver;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +16,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 
 import me.spigotserver.server.ServerManager;
 import me.spigotserver.version.VersionManager;
@@ -101,12 +104,40 @@ public class SpigotServer {
 
 	private static void loadGUI() {
 		try {
-			frame = new View();
-			frame.setVisible(true);
+			Thread gui = new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					frame = new View();
+					frame.setVisible(true);
+					frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+					frame.addWindowListener(new WindowAdapter() {
+						@SuppressWarnings("deprecation")
+						public void windowClosing(WindowEvent e) {
+			            	if (frame.started == "false") {
+			            		frame.dispose();
+			            		System.exit(0);
+			            	}
+			            	frame.serverThread.stop();
+		            		frame.dispose();
+			            	showWarningMessage();
+		            		System.exit(0);
+						}
+					});
+				}
+			});
+			gui.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	private static void showWarningMessage() {
+        JOptionPane.showMessageDialog(frame,
+                "The server is still running!\nForce killing it may lead to world data loss!",
+                "Warning",
+                JOptionPane.WARNING_MESSAGE);    
+    }
 
 	private static void loadServers() {
 		String path = "";
@@ -129,7 +160,11 @@ public class SpigotServer {
 			e.printStackTrace();
 		}
 		sm.setServerFolder(new File(path));
-		sm.loadServers();
+		try {
+			sm.loadServers();
+		}catch (NullPointerException e) {
+			
+		}
 	}
 
 	public static ServerManager getServerManager()

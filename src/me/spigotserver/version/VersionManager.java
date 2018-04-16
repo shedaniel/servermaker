@@ -1,7 +1,7 @@
 package me.spigotserver.version;
 
 public class VersionManager {
-	private static final String version = "0.1.0";
+	private static final String version = "0.1.1";
 	private static final boolean isBeta = false;
 	
 	public String getVersion() {
